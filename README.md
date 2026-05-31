@@ -1,124 +1,127 @@
-# Macro Recorder for macOS
+# MacCord
 
-Record keyboard **presses** and **holds**, then **replay** them into any app.
-Timing is preserved, so a 2-second hold replays as a 2-second hold and the gaps
-between keystrokes are reproduced exactly.
+A pixel-art **macro recorder for macOS**. Record your key presses and holds,
+then replay them into any app with a global hotkey. Built with Python + PySide6.
 
-The GUI is built with **PySide6 (Qt)** — installs via pip, no Homebrew/Tk needed.
+![MacCord](docs/screenshot.png)
 
-## Hotkeys (work from any app)
+## Features
 
-| Key  | Action                                   |
-|------|------------------------------------------|
-| `F6` | Start / stop recording                   |
-| `F7` | Play the current macro into focused app  |
-
-The window also has on-screen buttons, a saved-macros list, **playback speed**,
-and **repeat count**.
+- 🎬 Records key **presses and holds** with exact timing (a 2s hold replays as 2s)
+- ▶️ Replays into **any focused app** via a global hotkey
+- ⌨️ **Rebindable hotkeys** (defaults: `F6` record, `F7` play) — change them in-app
+- ⏩ Adjustable **playback speed** (0.25×–3×) and **repeat** (1–999)
+- 💾 **Save / load / delete** named macros
+- 🎨 Custom pixel-art skin
 
 ---
 
-## 1. Setup (already done on your machine)
+## Run from source (works on any Mac)
 
-The virtual environment and dependencies live in `~/MacroRecorder/.venv`
-(`pynput` + `PySide6`). To recreate from scratch:
+You need **Python 3.9+**.
 
 ```bash
-cd ~/MacroRecorder
+git clone https://github.com/ErosHabazaj/mac-macro-recorder.git
+cd mac-macro-recorder
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+python macro_recorder_qt.py
 ```
 
-## 2. Grant macOS permissions (required!)
+> **Homebrew Python?** PySide6 installs fine via pip — no extra system packages
+> needed (unlike Tkinter).
 
-macOS blocks reading and sending keystrokes until you allow it. Grant these to
-**the app you launch from** — usually **Terminal**.
+### Grant permissions (required)
 
-Open **System Settings → Privacy & Security**, then add Terminal to BOTH:
+macOS blocks reading and sending keystrokes until you allow it. Open
+**System Settings → Privacy & Security** and add **the app you launch from**
+(Terminal when running from source) to **both** lists, then quit & reopen it:
 
-1. **Input Monitoring**  → lets it *record* your keypresses
-2. **Accessibility**     → lets it *replay* keypresses into other apps
-
-Toggle Terminal **on** in each list, then fully quit and reopen Terminal so the
-permissions take effect.
-
-> Launching from VS Code's built-in terminal? Grant the permissions to
-> **Visual Studio Code** instead (or just use the standalone Terminal app).
-
-## 3. Run it
-
-**Easiest:** double-click **`run.command`** in Finder (right-click → Open the
-first time, since it's an unsigned script).
-
-**Or from a terminal:**
-
-```bash
-cd ~/MacroRecorder
-./.venv/bin/python macro_recorder_qt.py      # GUI (PySide6)
-./.venv/bin/python macro_recorder.py         # optional terminal version
-```
+1. **Input Monitoring** — to *record* keys
+2. **Accessibility** — to *replay* keys into other apps
 
 ---
 
-## How to use
+## Usage
 
-1. Press **F6** (or click **Record**). The status dot turns red.
-2. Type / hold keys in whatever app you like.
-3. Press **F6** again to stop. The macro auto-saves and the event count updates.
-4. Click into the app you want it played into.
-5. Press **F7** (or click **Play**). It replays there.
+| Key | Action |
+|-----|--------|
+| `F6` | Start / stop recording |
+| `F7` | Replay the macro into the focused app |
 
-In the window you can also:
+1. Press **F6**, type/hold keys in any app, press **F6** to stop (auto-saved).
+2. Click into your target app, press **F7** to replay it there.
+3. Click **Change** next to a hotkey to rebind it (saved to `settings.json`).
+4. **Save As / Load / Delete** manage named macros, stored in a `macros/` folder.
 
-- **Save As… / Load / Delete** named macros (stored in `~/MacroRecorder/macros/`).
-- Set **Speed** (0.25×–3×) and **Repeat** (1–999 times).
-- Click **Stop** while a long / repeating macro is playing to halt it.
+There's also a terminal-only version: `python macro_recorder.py`.
+
+---
+
+## Build it into a standalone `MacCord.app`
+
+```bash
+pip install pyinstaller
+pyinstaller --noconfirm --clean --windowed \
+  --name "MacCord" \
+  --osx-bundle-identifier com.eroshabazaj.maccord \
+  --icon MacCord.icns \
+  --add-data "assets:assets" \
+  --collect-all pynput \
+  macro_recorder_qt.py
+```
+
+The bundle appears in `dist/MacCord.app` — drag it into `/Applications`. Grant
+**Input Monitoring** and **Accessibility** to *MacCord.app* itself this time.
+
+### ⚠️ Distributing the prebuilt app (Gatekeeper)
+
+The build is **ad-hoc signed**, not notarized (notarizing needs a paid Apple
+Developer ID). If someone **downloads** a prebuilt `.app` instead of building it,
+macOS quarantines it and may say it *"can't be opened"* or *"is damaged."* To run it:
+
+```bash
+xattr -dr com.apple.quarantine "/Applications/MacCord.app"
+```
+
+…or right-click the app → **Open**. Building from source (above) avoids this
+entirely. Prebuilt binaries are also tied to the build machine's CPU arch, so
+**building from source is the recommended path for other users.**
 
 ---
 
 ## Customizing
 
-Edit the **CONFIG** section at the top of `macro_recorder.py`:
-
-```python
-RECORD_HOTKEY = keyboard.Key.f6   # change the record hotkey
-PLAY_HOTKEY   = keyboard.Key.f7   # change the play hotkey
-PLAYBACK_START_DELAY = 0.3        # pause before replay begins
-```
-
-The GUI reads these automatically and relabels its buttons to match.
+- **Hotkeys / speed / lead-in:** the CONFIG block at the top of `macro_recorder.py`
+- **The skin:** drop your own PNGs into `assets/` (sizes are documented in
+  [`assets/SPEC.md`](assets/SPEC.md)). Pixel art is scaled ×3 nearest-neighbour.
+- **The UI font:** replace `assets/font.ttf`
 
 ---
 
 ## Project layout
 
 ```
-~/MacroRecorder/
-├── macro_recorder_qt.py   ← the GUI (PySide6) — this is what run.command opens
-├── macro_recorder.py      ← the macro engine + optional terminal app
-├── run.command            ← double-click launcher
+mac-macro-recorder/
+├── macro_recorder_qt.py   # the GUI app (PySide6)
+├── macro_recorder.py      # macro engine + optional terminal app
+├── assets/                # pixel-art skin, VT323 font, asset spec
+├── MacCord.icns           # app icon (used when building the .app)
 ├── requirements.txt
-├── README.md
-├── .venv/                 ← Python env (pynput + PySide6)
-└── macros/                ← your saved macros (.json)
+├── run.command            # double-click launcher (after the venv exists)
+├── docs/screenshot.png
+└── README.md
 ```
+
+Recorded macros, the last recording, and `settings.json` are kept locally and
+are **not** committed.
 
 ---
 
-## Troubleshooting
+## Credits
 
-- **Nothing gets recorded / replayed** — almost always permissions. Re-check
-  **Input Monitoring** *and* **Accessibility**, then fully quit and reopen
-  Terminal.
-- **F6 / F7 do nothing** — on some Macs the function-key row sends media keys.
-  Press **Fn+F6 / Fn+F7**, or turn on *System Settings → Keyboard → "Use F1,
-  F2, etc. as standard function keys"*, or change the hotkeys in CONFIG.
-- **The macro types into the wrong app** — playback goes to the focused window.
-  Click the target app *before* pressing F7.
-
-## A note on safety
-
-This tool sends real keystrokes to your system. Only replay macros you recorded
-yourself, and avoid recording while typing passwords (they'd be saved as plain
-text in the macro's `.json` file).
+- UI font: **[VT323](https://fonts.google.com/specimen/VT323)** by Peter Hull,
+  licensed under the SIL Open Font License (see `assets/VT323-OFL.txt`).
+- Built with [pynput](https://github.com/moses-palmer/pynput) and
+  [PySide6](https://doc.qt.io/qtforpython/).

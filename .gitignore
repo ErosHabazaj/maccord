@@ -9,3 +9,11 @@ venv/
 
 # Recorded macros — may contain personal keystrokes, keep them local
 macros/*.json
+
+# Per-user settings (custom hotkeys)
+settings.json
+
+# PyInstaller build output
+build/
+dist/
+*.spec

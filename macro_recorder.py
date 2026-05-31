@@ -51,8 +51,15 @@ PLAYBACK_SPEED = 1.0                 # 1.0 = real time, 2.0 = twice as fast
 PLAYBACK_START_DELAY = 0.3           # seconds to wait before replay begins,
                                      # so you have time to release the hotkey
 
-# Where macros are stored (a "macros" folder next to this script).
-MACRO_DIR = Path(__file__).resolve().parent / "macros"
+# Where macros / settings are stored. Running from source this is the folder
+# next to the scripts; inside a bundled .app __file__ points into the read-only
+# bundle, so fall back to a fixed, writable folder in the user's home directory
+# (which is the same path as the source folder, so existing macros carry over).
+if getattr(sys, "frozen", False):
+    DATA_DIR = Path.home() / "MacroRecorder"
+else:
+    DATA_DIR = Path(__file__).resolve().parent
+MACRO_DIR = DATA_DIR / "macros"
 
 # Keys used to control the app - these are never recorded into a macro.
 CONTROL_KEYS = {RECORD_HOTKEY, PLAY_HOTKEY}
