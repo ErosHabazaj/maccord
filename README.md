@@ -1,9 +1,14 @@
-# MacCord
+# MacCord — macOS Keyboard Macro Recorder
 
-A pixel-art **macro recorder for macOS**. Record your key presses and holds,
-then replay them into any app with a global hotkey. Built with Python + PySide6.
+**MacCord** is a free, open-source **keyboard macro recorder and player for macOS** — a
+lightweight **AutoHotkey / Keyboard Maestro–style automation tool for Mac**. Record your
+key **presses and holds**, then **replay** them into any app with a **global hotkey**
+(`F6` to record, `F7` to play). Built with Python + PySide6, with a custom pixel-art UI.
 
-![MacCord](docs/screenshot.png)
+Great for **automating repetitive typing**, filling out forms, game macros, and chaining
+keyboard shortcuts — record once, replay anywhere.
+
+![MacCord — macOS macro recorder app showing Record and Play buttons, speed and repeat controls, and a saved-macros list](docs/screenshot.png)
 
 ## Features
 
