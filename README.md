@@ -27,8 +27,8 @@ keyboard shortcuts — record once, replay anywhere.
 You need **Python 3.9+**.
 
 ```bash
-git clone https://github.com/ErosHabazaj/mac-macro-recorder.git
-cd mac-macro-recorder
+git clone https://github.com/ErosHabazaj/maccord.git
+cd maccord
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -111,7 +111,7 @@ entirely. Prebuilt binaries are also tied to the build machine's CPU arch, so
 ## Project layout
 
 ```
-mac-macro-recorder/
+maccord/
 ├── macro_recorder_qt.py   # the GUI app (PySide6)
 ├── macro_recorder.py      # macro engine + optional terminal app
 ├── assets/                # pixel-art skin, VT323 font, asset spec
