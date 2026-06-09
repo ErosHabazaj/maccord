@@ -142,12 +142,14 @@ class MacroEngine:
         speed: float = 1.0,
         start_delay: float = 0.0,
         repeat: int = 1,
+        loop: bool = False,
     ) -> None:
         """Replay the recorded events into the currently focused app.
 
         speed       playback speed multiplier (2.0 = twice as fast)
         start_delay seconds to wait before the first key is sent
         repeat      how many times to play the macro back-to-back
+        loop        if True, repeat forever until request_stop() is called
         """
         if not self.events:
             print("\n[!] Nothing to play - record something first.", flush=True)
@@ -162,9 +164,8 @@ class MacroEngine:
             if start_delay > 0:
                 time.sleep(start_delay)
 
-            for _ in range(max(1, repeat)):
-                if self._stop_requested:
-                    break
+            iteration = 0
+            while not self._stop_requested:
                 # Start timing from the first event so a leading pause is dropped.
                 prev = self.events[0]["t"]
                 for ev in self.events:
@@ -183,6 +184,10 @@ class MacroEngine:
                         self._controller.release(key)
                         if key in held:
                             held.remove(key)
+
+                iteration += 1
+                if not loop and iteration >= max(1, repeat):
+                    break
         finally:
             # Release anything still held so we never leave a key "stuck down".
             for key in held:

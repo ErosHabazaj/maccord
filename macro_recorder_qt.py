@@ -38,6 +38,7 @@ from PySide6.QtGui import QFont, QFontDatabase, QIcon, QPainter, QPixmap
 from PySide6.QtWidgets import (
     QAbstractButton,
     QApplication,
+    QCheckBox,
     QComboBox,
     QHBoxLayout,
     QInputDialog,
@@ -115,6 +116,10 @@ QPushButton {{
 QPushButton:hover {{ background: #3d4f59; }}
 QPushButton:pressed {{ background: {RED}; }}
 QPushButton:disabled {{ color: #79828a; border-color: #5a4a4a; background: #2b3940; }}
+QCheckBox {{ color: {TEXT}; background: transparent; font-family: '{family}'; font-size: {FONT_PX}px; spacing: 6px; }}
+QCheckBox::indicator {{ width: 14px; height: 14px; border: 1px solid {RED}; border-radius: 2px; background: {PANEL}; }}
+QCheckBox::indicator:checked {{ background: {RED}; }}
+QCheckBox:disabled {{ color: #79828a; }}
 """
 
 
@@ -198,6 +203,7 @@ class MacroWindow(QWidget):
 
         self._speed = 1.0
         self._repeat = 1
+        self._loop = False
         self._message = ""
         self._message_time = 0.0
         self._refresh_list = False
@@ -330,6 +336,9 @@ class MacroWindow(QWidget):
         self.repeat_spin.setRange(1, 999)
         self.repeat_spin.setValue(1)
         opt.addWidget(self.repeat_spin)
+        opt.addSpacing(14)
+        self.loop_check = QCheckBox("Loop ∞")
+        opt.addWidget(self.loop_check)
         opt.addStretch(1)
         root.addLayout(opt)
 
@@ -396,7 +405,10 @@ class MacroWindow(QWidget):
             self.toggle_record()
             return
         if key == self.play_hotkey:
-            self.play()
+            if self.engine.playing:
+                self.engine.request_stop()
+            else:
+                self.play()
             return
         self.engine.record("press", key)
 
@@ -471,7 +483,10 @@ class MacroWindow(QWidget):
         threading.Thread(target=self._play_worker, daemon=True).start()
 
     def _play_worker(self) -> None:
-        self.engine.play(speed=self._speed, start_delay=PLAYBACK_START_DELAY, repeat=self._repeat)
+        self.engine.play(
+            speed=self._speed, start_delay=PLAYBACK_START_DELAY,
+            repeat=self._repeat, loop=self._loop,
+        )
         self._notify("Done.")
 
     def _notify(self, text: str) -> None:
@@ -552,6 +567,8 @@ class MacroWindow(QWidget):
         except ValueError:
             self._speed = 1.0
         self._repeat = max(1, self.repeat_spin.value())
+        self._loop = self.loop_check.isChecked()
+        self.repeat_spin.setEnabled(not self._loop)
 
         if self._refresh_list:
             self._refresh_list = False
@@ -571,7 +588,7 @@ class MacroWindow(QWidget):
             self.play_btn.setEnabled(False)
         elif self.engine.playing:
             self.dot.setStyleSheet(f"color: {COLOR_PLAY}; background: transparent;")
-            self.status_label.setText("PLAYING")
+            self.status_label.setText("LOOPING" if self._loop else "PLAYING")
             self.record_btn.set_active(False)
             self.record_btn.setEnabled(False)
             self.play_btn.set_active(True)

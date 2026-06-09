@@ -16,6 +16,7 @@ keyboard shortcuts — record once, replay anywhere.
 - ▶️ Replays into **any focused app** via a global hotkey
 - ⌨️ **Rebindable hotkeys** (defaults: `F6` record, `F7` play) — change them in-app
 - ⏩ Adjustable **playback speed** (0.25×–3×) and **repeat** (1–999)
+- 🔁 **Loop indefinitely** until you stop it — tick "Loop ∞", press the play hotkey to start/stop
 - 💾 **Save / load / delete** named macros
 - 🎨 Custom pixel-art skin
 
@@ -53,12 +54,14 @@ macOS blocks reading and sending keystrokes until you allow it. Open
 | Key | Action |
 |-----|--------|
 | `F6` | Start / stop recording |
-| `F7` | Replay the macro into the focused app |
+| `F7` | Play into the focused app — press again to **stop** (also stops a loop) |
 
 1. Press **F6**, type/hold keys in any app, press **F6** to stop (auto-saved).
 2. Click into your target app, press **F7** to replay it there.
 3. Click **Change** next to a hotkey to rebind it (saved to `settings.json`).
 4. **Save As / Load / Delete** manage named macros, stored in a `macros/` folder.
+
+Tick **Loop ∞** to replay continuously until you press the play hotkey again (or click Stop).
 
 There's also a terminal-only version: `python macro_recorder.py`.
 
